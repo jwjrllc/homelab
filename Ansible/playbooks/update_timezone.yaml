@@ -1,0 +1,27 @@
+---
+- name: Set timezone and configure timesyncd
+  hosts: "ubuntu"
+  become: yes
+  tasks:
+  - name: set timezone
+    shell: timedatectl set-timezone America/New_York
+
+  - name: Install NTP package
+    ansible.builtin.package:
+      name: ntp
+      state: present
+
+  - name: Copy over the timesyncd config  
+    ansible.builtin.copy:
+      src: files/ntp.conf 
+      dest: /etc/ntpsec/ntp.conf
+      owner: root
+      group: root
+      mode: '0644'
+      backup: yes
+
+  - name: Ensure NTP service is enabled and running
+    ansible.builtin.service:
+      name: ntp
+      state: started
+      enabled: yes

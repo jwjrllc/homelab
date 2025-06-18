@@ -1,0 +1,25 @@
+---
+- name: Install core packages
+  hosts: "ubuntu"
+  become: true
+
+  tasks:
+    - name: Install core packages
+      ansible.builtin.apt:
+        name:
+          - nfs-common
+          - plocate
+          - cifs-utils 
+          - net-tools 
+          - curl
+          - screen
+          - gnupg
+    
+    - name: Add SSH-RSA to end of sshd_config
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        line: PubkeyAcceptedAlgorithms=+ssh-rsa
+    - name: Host ssh-rsa 
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        line: HostKeyAlgorithms +ssh-rsa

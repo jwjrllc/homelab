@@ -1,0 +1,65 @@
+---
+- name: Install or upgrade to Python 3.12 on Ubuntu/Debian
+  hosts: debian
+  become: yes
+
+  vars:
+    python_version: "3.12.7"
+    python_src_dir: "/usr/src"
+    python_prefix: "/usr/local"
+
+  tasks:
+
+    - name: Ensure required build tools are installed
+      apt:
+        name:
+          - build-essential
+          - zlib1g-dev
+          - libncurses5-dev
+          - libgdbm-dev
+          - libnss3-dev
+          - libssl-dev
+          - libreadline-dev
+          - libffi-dev
+          - curl
+          - libbz2-dev
+          - wget
+          - xz-utils
+        state: present
+        update_cache: yes
+
+    - name: Download Python {{ python_version }} source
+      get_url:
+        url: "https://www.python.org/ftp/python/{{ python_version }}/Python-{{ python_version }}.tgz"
+        dest: "{{ python_src_dir }}/Python-{{ python_version }}.tgz"
+        mode: '0644'
+
+    - name: Extract Python source archive
+      unarchive:
+        src: "{{ python_src_dir }}/Python-{{ python_version }}.tgz"
+        dest: "{{ python_src_dir }}"
+        remote_src: yes
+
+    - name: Compile and install Python {{ python_version }}
+      shell: |
+        ./configure --enable-optimizations --prefix={{ python_prefix }}
+        make -j "$(nproc)"
+        make altinstall
+      args:
+        chdir: "{{ python_src_dir }}/Python-{{ python_version }}"
+        creates: "{{ python_prefix }}/bin/python3.12"
+
+    - name: Verify Python 3.12 installation
+      command: "{{ python_prefix }}/bin/python3.12 --version"
+      register: python_version_output
+
+    - name: Show installed Python version
+      debug:
+        msg: "Python 3.12 successfully installed: {{ python_version_output.stdout }}"
+
+    - name: (Optional) Set python3 symlink to python3.12
+      file:
+        src: "{{ python_prefix }}/bin/python3.12"
+        dest: /usr/bin/python3
+        state: link
+        force: yes
