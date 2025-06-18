@@ -1,0 +1,29 @@
+---
+- name: Create user on managed hosts
+  hosts: all
+  become: true
+  vars:
+    new_user: ansible
+
+  tasks:
+    - name: Create the user
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        comment: "Deployment User"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        state: present
+        create_home: yes
+
+    - name: Set authorized key for the user
+      ansible.builtin.authorized_key:
+        user: "{{ new_user }}"
+        state: present
+        key: "{{ lookup('file', 'files/id_rsa.pub') }}"
+    
+    - name: Allow user to have passwordless sudo
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ new_user }}"
+        content: "{{ new_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: '0440'
