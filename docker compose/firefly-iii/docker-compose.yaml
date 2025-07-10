@@ -11,22 +11,19 @@ services:
       - firefly_iii
     ports:
       - 88:8080
-    #depends_on:
-    #  - db
+    depends_on:
+      - db
   
-  #
-  # This is commented out because I migrated to a External DB
-  #
-  #db:
-    #image: mariadb:lts
-    #hostname: db
-    #container_name: firefly_iii_db
-    #restart: always
-    #env_file: .db.env
-    #networks:
-    #  - firefly_iii
-    #volumes:
-    #  - firefly_iii_db:/var/lib/mysql
+  db:
+    image: mariadb:lts
+    hostname: db
+    container_name: firefly_iii_db
+    restart: always
+    env_file: .db.env
+    networks:
+      - firefly_iii
+    volumes:
+      - firefly_iii_db:/var/lib/mysql
   
   importer:
     image: fireflyiii/data-importer:latest
