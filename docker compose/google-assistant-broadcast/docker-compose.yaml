@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  google-assistant-broadcast:
+    container_name: google-assistant-broadcast
+    image: ismarslomic/google-assistant-broadcast:latest
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    volumes:
+      - /opt/ga/config:/usr/src/config
